@@ -22,7 +22,7 @@
             text-align: center;
             margin-bottom: 12px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
         }
 
         h1 {
@@ -30,21 +30,16 @@
             margin-bottom: 10px;
         }
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-        }
-
         #map-container {
             width: 100%;
-            max-width: 1200px;
-            aspect-ratio: 16/9;
+            max-width: 1400px;
+            height: 650px;
             margin: 0 auto;
             background-color: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             border-radius: 8px;
             overflow: hidden;
+            position: relative;
         }
 
         #map {
@@ -61,6 +56,98 @@
         .team-logo {
             transition: transform 0.2s;
         }
+
+        .team-logo.hidden {
+            opacity: 0.2;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            pointer-events: none;
+            font-family: sans-serif;
+            font-size: 12px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            max-width: 200px;
+            line-height: 1.4;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 10px;
+            left: 10px;  /* Changed from right to left */
+            z-index: 10;
+            width: 180px
+        }
+
+        .dropdown-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            left: 0;  /* Changed from right to left */
+            background: rgba(255, 255, 255, 0.95);
+            min-width: 180px;
+            width: 180px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .filter-option {
+            display: block;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .filter-option input {
+            margin-right: 8px;
+        }
+
+        .select-all {
+            background: none;
+            border: none;
+            color: #0066cc;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .select-all:hover {
+            color: #004499;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +156,34 @@
 </header>
 
 <div id="map-container">
+    <div class="dropdown" style="left: 10px; right: auto;">
+        <button class="dropdown-btn">Filters ▼</button>
+        <div class="dropdown-content" style="right: auto; left: 0;">
+            <div class="filter-group">
+                <h3>League <button class="select-all" data-filter="league">Select All</button></h3>
+                <label class="filter-option"><input type="checkbox" class="league-filter" value="AL" checked> American League</label>
+                <label class="filter-option"><input type="checkbox" class="league-filter" value="NL" checked> National League</label>
+            </div>
+            <div class="filter-group">
+                <h3>Division <button class="select-all" data-filter="division">Select All</button></h3>
+                <label class="filter-option"><input type="checkbox" class="division-filter" value="AL West" checked> AL West</label>
+                <label class="filter-option"><input type="checkbox" class="division-filter" value="AL East" checked> AL East</label>
+                <label class="filter-option"><input type="checkbox" class="division-filter" value="AL Central" checked> AL Central</label>
+                <label class="filter-option"><input type="checkbox" class="division-filter" value="NL West" checked> NL West</label>
+                <label class="filter-option"><input type="checkbox" class="division-filter" value="NL East" checked> NL East</label>
+                <label class="filter-option"><input type="checkbox" class="division-filter" value="NL Central" checked> NL Central</label>
+            </div>
+            <div class="filter-group">
+                <h3>Pay Tier <button class="select-all" data-filter="pay-tier">Select All</button></h3>
+                <label class="filter-option"><input type="checkbox" class="pay-tier-filter" value="1" checked> 5 Highest Payrolls</label>
+                <label class="filter-option"><input type="checkbox" class="pay-tier-filter" value="2" checked> 6-10</label>
+                <label class="filter-option"><input type="checkbox" class="pay-tier-filter" value="3" checked> 11-15</label>
+                <label class="filter-option"><input type="checkbox" class="pay-tier-filter" value="4" checked> 16-20</label>
+                <label class="filter-option"><input type="checkbox" class="pay-tier-filter" value="5" checked> 21-25</label>
+                <label class="filter-option"><input type="checkbox" class="pay-tier-filter" value="6" checked> 5 Cheapest Payrolls</label>
+            </div>
+        </div>
+    </div>
     <div id="map"></div>
 </div>
 
