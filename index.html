@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MLB Pay Discrepancy</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 8px;
+            background-color: rgb(51, 51, 51);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        #map-container {
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 16/9;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .state {
+            fill: #f0f0f0;
+            stroke: #999;
+            stroke-width: 1px;
+        }
+
+        .team-logo {
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>MLB Pay Discrepancy</h1>
+</header>
+
+<div id="map-container">
+    <div id="map"></div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
