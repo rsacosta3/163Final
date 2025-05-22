@@ -219,7 +219,20 @@ d3.csv("winspay.csv").then(data => {
                         .style("opacity", 0);
                 })
                 .on("click", function(event, d) {
-                    console.log(`Team clicked: ${d.name}`);
+                    event.stopPropagation();
+                    // Encode team data as URL parameters
+                    const params = new URLSearchParams();
+                    params.set('name', d.name);
+                    params.set('abbr', d.abbreviation);
+                    params.set('league', d.league);
+                    params.set('division', d.division);
+                    params.set('tier', d.payTier);
+                    params.set('wins', d.avgWins);
+                    params.set('payroll', d.avgPayroll);
+                    params.set('logo', d.logo);
+
+                    // Navigate to the team page with parameters
+                    window.location.href = `team.html?${params.toString()}`;
                 })
                 .transition()
                 .duration(1000)
@@ -240,6 +253,85 @@ d3.csv("winspay.csv").then(data => {
             console.error("Error loading the CSV or map data:", error);
         });
 });
+
+// Function to create and show team page
+function showTeamPage(team) {
+    // Create overlay container
+    const overlay = d3.select("body").append("div")
+        .attr("class", "team-overlay")
+        .style("position", "fixed")
+        .style("top", "0")
+        .style("left", "0")
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("background", "rgba(0,0,0,0.8)")
+        .style("z-index", "1000")
+        .style("display", "flex")
+        .style("justify-content", "center")
+        .style("align-items", "center");
+
+    // Create content container
+    const content = overlay.append("div")
+        .attr("class", "team-content")
+        .style("background", "white")
+        .style("padding", "20px")
+        .style("border-radius", "8px")
+        .style("max-width", "800px")
+        .style("max-height", "90vh")
+        .style("overflow-y", "auto");
+
+    // Add team header
+    content.append("h2")
+        .text(`An Inside Look at the ${team.name}`)
+        .style("margin-top", "0")
+        .style("color", "#333");
+
+    // Add team logo
+    content.append("img")
+        .attr("src", team.logo)
+        .attr("alt", `${team.name} logo`)
+        .style("height", "100px")
+        .style("display", "block")
+        .style("margin", "0 auto 20px");
+
+    // Add team info
+    const infoDiv = content.append("div")
+        .style("display", "grid")
+        .style("grid-template-columns", "1fr 1fr")
+        .style("gap", "20px");
+
+    // Left column
+    const leftCol = infoDiv.append("div");
+    leftCol.append("p").html(`<strong>Abbreviation:</strong> ${team.abbreviation}`);
+    leftCol.append("p").html(`<strong>League:</strong> ${team.league}`);
+    leftCol.append("p").html(`<strong>Division:</strong> ${team.division}`);
+    leftCol.append("p").html(`<strong>Payroll Tier:</strong> ${team.payTier} of 6`);
+
+    // Right column
+    const rightCol = infoDiv.append("div");
+    rightCol.append("p").html(`<strong>Average Wins:</strong> ${team.avgWins}`);
+    rightCol.append("p").html(`<strong>Average Payroll:</strong> ${team.avgPayroll}`);
+
+    // Add close button
+    content.append("button")
+        .text("Close")
+        .style("display", "block")
+        .style("margin", "20px auto 0")
+        .style("padding", "8px 16px")
+        .style("background", "#0066cc")
+        .style("color", "white")
+        .style("border", "none")
+        .style("border-radius", "4px")
+        .style("cursor", "pointer")
+        .on("click", () => overlay.remove());
+
+    // Close when clicking outside content
+    overlay.on("click", function(event) {
+        if (event.target === this) {
+            overlay.remove();
+        }
+    });
+}
 
 // Handle window resize
 window.addEventListener("resize", function() {
