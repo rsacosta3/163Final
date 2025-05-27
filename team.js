@@ -7,6 +7,7 @@ document.getElementById('team-name').textContent = teamName;
 document.getElementById('team-logo').src = teamLogo;
 
 createSpendingWinsChart(teamName, teamAbbr);
+createPayrollPieChart(teamAbbr);
 
 function createSpendingWinsChart(teamName, teamAbbr) {
     const csvPath = "Spend vs Wins_data.csv";
@@ -50,10 +51,8 @@ function createSpendingWinsChart(teamName, teamAbbr) {
     }
 
     function renderChart(data) {
-        // Clear any existing content
         d3.select("#spending-wins-chart").html("");
 
-        // Dimensions based on container
         const container = document.getElementById("spending-wins-chart");
         const m = { top: 30, right: 100, bottom: 50, left: 60 };
         const w = container.clientWidth - m.left - m.right;
@@ -68,7 +67,6 @@ function createSpendingWinsChart(teamName, teamAbbr) {
             .append("g")
             .attr("transform", `translate(${m.left},${m.top})`);
 
-        // Scales
         const x = d3.scaleBand()
             .domain(data.map(d => d.year))
             .range([0, w]).padding(0.2);
@@ -79,7 +77,6 @@ function createSpendingWinsChart(teamName, teamAbbr) {
             .domain([d3.min(data, d=>d.spending)*0.9, d3.max(data, d=>d.spending)*1.05])
             .range([h, 0]);
 
-        // Lines
         svg.append("path")
             .datum(data)
             .attr("fill","none").attr("stroke","steelblue").attr("stroke-width",2)
@@ -97,7 +94,6 @@ function createSpendingWinsChart(teamName, teamAbbr) {
 
         const tooltip = d3.select("body").append("div").attr("class","tooltip");
 
-        // Dots + hover
         svg.selectAll(".dot-w")
             .data(data).enter().append("circle")
             .attr("cx", d=>x(d.year)+x.bandwidth()/2)
@@ -124,12 +120,10 @@ function createSpendingWinsChart(teamName, teamAbbr) {
             })
             .on("mouseout", ()=> tooltip.style("display","none"));
 
-        // Axes
         svg.append("g").attr("transform",`translate(0,${h})`).call(d3.axisBottom(x));
         svg.append("g").call(d3.axisLeft(yW));
         svg.append("g").attr("transform",`translate(${w},0)`).call(d3.axisRight(yS));
 
-        // Labels
         svg.append("text").attr("x", w/2).attr("y", h+40)
             .attr("text-anchor","middle").text("Year");
         svg.append("text").attr("transform","rotate(-90)")
@@ -137,17 +131,100 @@ function createSpendingWinsChart(teamName, teamAbbr) {
         svg.append("text").attr("transform","rotate(-90)")
             .attr("x",-h/2).attr("y",w+50).attr("text-anchor","middle").text("Spending ($M)");
 
-        // Create legend under chart title
         const titleContainer = d3.select(".chart-title");
-        const legend = titleContainer.append("div")
-            .attr("class", "chart-legend-inline");
+        const legend = titleContainer.append("div").attr("class", "chart-legend-inline");
 
-        legend.append("div")
-            .attr("class", "legend-item")
+        legend.append("div").attr("class", "legend-item")
             .html('<div class="legend-color" style="background:steelblue;"></div><span>Wins</span>');
-
-        legend.append("div")
-            .attr("class", "legend-item")
+        legend.append("div").attr("class", "legend-item")
             .html('<div class="legend-color" style="background:green;"></div><span>Spending ($M)</span>');
+    }
+}
+
+function createPayrollPieChart(teamAbbr) {
+    const csvPath = "winspay.csv";
+
+    fetch(csvPath)
+        .then(res => res.text())
+        .then(text => d3.csvParse(text))
+        .then(data => {
+            const filtered = data.filter(d => d.Team === teamAbbr);
+            if (!filtered.length) {
+                d3.select("#pie-chart").html("<p style='color:red;text-align:center'>No data available</p>");
+                return;
+            }
+
+            const categorySums = d3.rollup(
+                filtered,
+                v => d3.sum(v, d => +d["Avg. Amount of this Payroll Classification"]),
+                d => d["Payroll Type"]
+            );
+
+            const pieData = Array.from(categorySums, ([type, value]) => ({ type, value }));
+
+            const allowed = ["Active", "Buried", "Injured", "Retained"];
+            const cleanData = pieData.filter(d => allowed.includes(getSimpleType(d.type)));
+
+            renderPie(cleanData);
+        });
+
+    function renderPie(data) {
+        d3.select("#pie-chart").html("");
+
+        const width = 400, height = 300, radius = Math.min(width, height) / 2;
+
+        const svg = d3.select("#pie-chart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${width} ${height + 40}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+        const pie = d3.pie().value(d => d.value).sort(null);
+        const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+        const color = d3.scaleOrdinal()
+            .domain(["Active", "Buried", "Injured", "Retained"])
+            .range(["#1f77b4", "#ff7f0e", "#d62728", "#2ca02c"]);
+
+        const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("display", "none");
+
+        svg.selectAll("path")
+            .data(pie(data))
+            .enter()
+            .append("path")
+            .attr("d", arc)
+            .attr("fill", d => color(getSimpleType(d.data.type)))
+            .on("mouseover", (event, d) => {
+                tooltip.style("display", "block")
+                    .html(`<strong>${getSimpleType(d.data.type)}</strong><br/>$${d.data.value.toLocaleString()}`);
+            })
+            .on("mousemove", event => {
+                tooltip
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => tooltip.style("display", "none"));
+
+        const titleContainer = d3.select("#pie-chart-container .chart-title");
+        const legend = titleContainer.append("div").attr("class", "chart-legend-inline");
+
+        data.forEach(d => {
+            const type = getSimpleType(d.type);
+            legend.append("div").attr("class", "legend-item")
+                .html(`<div class="legend-color" style="background:${color(type)};"></div><span>${type}</span>`);
+        });
+    }
+
+    function getSimpleType(type) {
+        if (type.includes("Active")) return "Active";
+        if (type.includes("Buried")) return "Buried";
+        if (type.includes("Injured")) return "Injured";
+        if (type.includes("Retained")) return "Retained";
+        return "Other";
     }
 }

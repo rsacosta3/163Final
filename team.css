@@ -40,12 +40,14 @@
 /* Dashboard layout */
 .dashboard {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 20px;
 }
 
-/* Chart styling */
-#visualization-container {
+/* Chart containers */
+#visualization-container,
+#pie-chart-container {
     width: 100%;
     max-width: 550px;
     background-color: white;
@@ -53,14 +55,11 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     box-sizing: border-box;
-    margin-left: 0;
-    position: relative;
 }
+
 .chart-container {
     width: 100%;
     height: auto;
-    max-width: 1400px;
-    margin: 0 auto;
 }
 .chart-title {
     font-size: 1.3rem;
@@ -78,6 +77,7 @@
     font-size: 13px;
     margin-top: 5px;
     margin-bottom: 15px;
+    flex-wrap: nowrap;
 }
 .chart-legend-inline .legend-item {
     display: flex;
@@ -88,25 +88,6 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-}
-
-/* Axis labels, lines, grid */
-.axis-label {
-    font-size: 12px;
-    font-weight: bold;
-    fill: #333;
-}
-.line {
-    fill: none;
-    stroke-width: 2px;
-}
-.grid line {
-    stroke: lightgrey;
-    stroke-opacity: 0.7;
-    shape-rendering: crispEdges;
-}
-.grid path {
-    stroke-width: 0;
 }
 
 /* Tooltip styling */
@@ -123,7 +104,7 @@
     display: none;
 }
 
-/* Responsive chart scaling */
+/* Chart specific styles */
 #spending-wins-chart {
     width: 100%;
     height: 100%;
@@ -136,6 +117,19 @@
     display: block;
 }
 
+#pie-chart {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 16 / 10;
+    position: relative;
+    margin-top: 10px;
+}
+#pie-chart svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 /* Responsive header layout */
 @media (max-width: 768px) {
     .header {
@@ -143,17 +137,18 @@
         text-align: center;
     }
     .team-logo {
-        margin-top: 10px;
+        margin: 10px 0 0 0;
         height: 70px;
     }
     .team-title {
         font-size: 1.5rem;
     }
-    #visualization-container {
-        margin: 0 auto;
+    .dashboard {
+        flex-direction: column;
+        align-items: center;
     }
-    .chart-legend {
-        top: 15px;
-        right: 15px;
+    #visualization-container,
+    #pie-chart-container {
+        margin: 0 auto 20px;
     }
 }
