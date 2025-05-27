@@ -1,3 +1,51 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const introScreen = document.getElementById("intro-screen");
+    const logo = document.querySelector(".intro-logo");
+    const text1 = document.getElementById("text-1");
+    const text2 = document.getElementById("text-2");
+    const text3 = document.getElementById("text-3");
+    const exploreBtn = document.getElementById("explore-btn");
+
+    // Show logo first
+    setTimeout(() => {
+        logo.classList.add("show");
+    }, 500);
+
+    // Then show text1
+    setTimeout(() => {
+        text1.classList.add("show");
+    }, 1500);
+
+    // Then show text2
+    setTimeout(() => {
+        text2.classList.add("show");
+    }, 3500);
+
+    // Then show text3
+    setTimeout(() => {
+        text3.classList.add("show");
+    }, 5500);
+
+    // Then show explore button
+    setTimeout(() => {
+        exploreBtn.classList.add("show");
+    }, 7000);
+
+    // Handle explore button click
+    exploreBtn.addEventListener("click", () => {
+        // Fade out intro screen
+        introScreen.style.transition = "opacity 1s ease";
+        introScreen.style.opacity = 0;
+
+        // Remove intro screen after fade
+        setTimeout(() => {
+            introScreen.remove();
+            // Animate team logos after intro is removed
+            animateTeamLogos();
+        }, 1000);
+    });
+});
+
 // Set dimensions based on container
 const container = document.getElementById("map-container");
 const width = container.clientWidth;
@@ -64,6 +112,32 @@ const mlbTeams = [
     {name: "Toronto Blue Jays", abbreviation: "TOR", lat: 47.6415, lng: -79.3891, logo: "logos/jays.png", division: "AL East", league: "AL"},
     {name: "Washington Nationals", abbreviation: "WSH", lat: 36.873, lng: -77.0074, logo: "logos/nats.png", division: "NL East", league: "NL"}
 ];
+
+// Function to animate team logos
+function animateTeamLogos() {
+    // Group teams by their pay tier
+    const teamsByTier = {};
+    mlbTeams.forEach(team => {
+        if (!teamsByTier[team.payTier]) {
+            teamsByTier[team.payTier] = [];
+        }
+        teamsByTier[team.payTier].push(team);
+    });
+
+    // Animate each tier sequentially
+    Object.keys(teamsByTier).sort().forEach((tier, tierIndex) => {
+        const delay = tierIndex * 500; // 500ms between tiers
+
+        teamsByTier[tier].forEach((team, teamIndex) => {
+            svg.selectAll(".team-logo")
+                .filter(d => d.name === team.name)
+                .transition()
+                .delay(delay + (teamIndex * 100)) // Small stagger within tiers
+                .duration(800)
+                .attr("opacity", 1);
+        });
+    });
+}
 
 // Function to apply filters
 function applyFilters() {
@@ -203,13 +277,13 @@ d3.csv("winspay.csv").then(data => {
                         .duration(200)
                         .style("opacity", .9);
                     tooltip.html(`
-        <strong>${d.name}</strong><br>
-        Avg Wins: ${d.avgWins}<br>
-        Avg Payroll: ${d.avgPayroll}<br>
-        Division: ${d.division}<br>
-        Payroll Tier: ${d.payTier} of 6<br>
-        <em>Click the Team Icon to Explore More</em>
-    `)
+                        <strong>${d.name}</strong><br>
+                        Avg Wins: ${d.avgWins}<br>
+                        Avg Payroll: ${d.avgPayroll}<br>
+                        Division: ${d.division}<br>
+                        Payroll Tier: ${d.payTier} of 6<br>
+                        <em>Click the Team Icon to Explore More</em>
+                    `)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px");
                 })
@@ -233,33 +307,7 @@ d3.csv("winspay.csv").then(data => {
 
                     // Navigate to the team page with parameters
                     window.location.href = `team.html?${params.toString()}`;
-                })
-            // First hide all logos initially
-            svg.selectAll(".team-logo")
-                .attr("opacity", 0);
-
-// Group teams by their pay tier
-            const teamsByTier = {};
-            mlbTeams.forEach(team => {
-                if (!teamsByTier[team.payTier]) {
-                    teamsByTier[team.payTier] = [];
-                }
-                teamsByTier[team.payTier].push(team);
-            });
-
-// Animate each tier sequentially
-            Object.keys(teamsByTier).sort().forEach((tier, tierIndex) => {
-                const delay = tierIndex * 500; // 500ms between tiers
-
-                teamsByTier[tier].forEach((team, teamIndex) => {
-                    svg.selectAll(".team-logo")
-                        .filter(d => d.name === team.name)
-                        .transition()
-                        .delay(delay + (teamIndex * 100)) // Small stagger within tiers
-                        .duration(800)
-                        .attr("opacity", 1);
                 });
-            });
 
             // Set up filter event listeners
             document.querySelectorAll('.league-filter, .division-filter, .pay-tier-filter').forEach(el => {
@@ -276,85 +324,6 @@ d3.csv("winspay.csv").then(data => {
             console.error("Error loading the CSV or map data:", error);
         });
 });
-
-// Function to create and show team page
-function showTeamPage(team) {
-    // Create overlay container
-    const overlay = d3.select("body").append("div")
-        .attr("class", "team-overlay")
-        .style("position", "fixed")
-        .style("top", "0")
-        .style("left", "0")
-        .style("width", "100%")
-        .style("height", "100%")
-        .style("background", "rgba(0,0,0,0.8)")
-        .style("z-index", "1000")
-        .style("display", "flex")
-        .style("justify-content", "center")
-        .style("align-items", "center");
-
-    // Create content container
-    const content = overlay.append("div")
-        .attr("class", "team-content")
-        .style("background", "white")
-        .style("padding", "20px")
-        .style("border-radius", "8px")
-        .style("max-width", "800px")
-        .style("max-height", "90vh")
-        .style("overflow-y", "auto");
-
-    // Add team header
-    content.append("h2")
-        .text(`An Inside Look at the ${team.name}`)
-        .style("margin-top", "0")
-        .style("color", "#333");
-
-    // Add team logo
-    content.append("img")
-        .attr("src", team.logo)
-        .attr("alt", `${team.name} logo`)
-        .style("height", "100px")
-        .style("display", "block")
-        .style("margin", "0 auto 20px");
-
-    // Add team info
-    const infoDiv = content.append("div")
-        .style("display", "grid")
-        .style("grid-template-columns", "1fr 1fr")
-        .style("gap", "20px");
-
-    // Left column
-    const leftCol = infoDiv.append("div");
-    leftCol.append("p").html(`<strong>Abbreviation:</strong> ${team.abbreviation}`);
-    leftCol.append("p").html(`<strong>League:</strong> ${team.league}`);
-    leftCol.append("p").html(`<strong>Division:</strong> ${team.division}`);
-    leftCol.append("p").html(`<strong>Payroll Tier:</strong> ${team.payTier} of 6`);
-
-    // Right column
-    const rightCol = infoDiv.append("div");
-    rightCol.append("p").html(`<strong>Average Wins:</strong> ${team.avgWins}`);
-    rightCol.append("p").html(`<strong>Average Payroll:</strong> ${team.avgPayroll}`);
-
-    // Add close button
-    content.append("button")
-        .text("Close")
-        .style("display", "block")
-        .style("margin", "20px auto 0")
-        .style("padding", "8px 16px")
-        .style("background", "#0066cc")
-        .style("color", "white")
-        .style("border", "none")
-        .style("border-radius", "4px")
-        .style("cursor", "pointer")
-        .on("click", () => overlay.remove());
-
-    // Close when clicking outside content
-    overlay.on("click", function(event) {
-        if (event.target === this) {
-            overlay.remove();
-        }
-    });
-}
 
 // Handle window resize
 window.addEventListener("resize", function() {
