@@ -1,5 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     const introScreen = document.getElementById("intro-screen");
+
+    // If intro has already been shown this session, skip it
+    if (sessionStorage.getItem("introShown")) {
+        introScreen.remove();
+        animateTeamLogos(); // Immediately animate logos
+        return;
+    }
+
     const logo = document.querySelector(".intro-logo");
     const text1 = document.getElementById("text-1");
     const text2 = document.getElementById("text-2");
@@ -40,11 +48,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Remove intro screen after fade
         setTimeout(() => {
             introScreen.remove();
-            // Animate team logos after intro is removed
-            animateTeamLogos();
+            sessionStorage.setItem("introShown", "true"); // Mark intro as shown
+            animateTeamLogos(); // Proceed with logo animation
         }, 1000);
     });
 });
+
 
 // Set dimensions based on container
 const container = document.getElementById("map-container");
@@ -308,6 +317,10 @@ d3.csv("winspay.csv").then(data => {
                     // Navigate to the team page with parameters
                     window.location.href = `team.html?${params.toString()}`;
                 });
+
+            if (sessionStorage.getItem("introShown")) {
+                animateTeamLogos();
+            }
 
             // Set up filter event listeners
             document.querySelectorAll('.league-filter, .division-filter, .pay-tier-filter').forEach(el => {
