@@ -45,7 +45,8 @@ h1 {
 }
 
 .team-logo {
-    transition: transform 0.2s;
+    transition: opacity 0.8s ease, transform 0.2s;
+    transform-origin: center;
 }
 
 .team-logo.hidden {

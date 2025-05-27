@@ -234,9 +234,32 @@ d3.csv("winspay.csv").then(data => {
                     // Navigate to the team page with parameters
                     window.location.href = `team.html?${params.toString()}`;
                 })
-                .transition()
-                .duration(1000)
-                .attr("opacity", 1);
+            // First hide all logos initially
+            svg.selectAll(".team-logo")
+                .attr("opacity", 0);
+
+// Group teams by their pay tier
+            const teamsByTier = {};
+            mlbTeams.forEach(team => {
+                if (!teamsByTier[team.payTier]) {
+                    teamsByTier[team.payTier] = [];
+                }
+                teamsByTier[team.payTier].push(team);
+            });
+
+// Animate each tier sequentially
+            Object.keys(teamsByTier).sort().forEach((tier, tierIndex) => {
+                const delay = tierIndex * 500; // 500ms between tiers
+
+                teamsByTier[tier].forEach((team, teamIndex) => {
+                    svg.selectAll(".team-logo")
+                        .filter(d => d.name === team.name)
+                        .transition()
+                        .delay(delay + (teamIndex * 100)) // Small stagger within tiers
+                        .duration(800)
+                        .attr("opacity", 1);
+                });
+            });
 
             // Set up filter event listeners
             document.querySelectorAll('.league-filter, .division-filter, .pay-tier-filter').forEach(el => {

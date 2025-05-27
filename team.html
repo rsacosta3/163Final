@@ -11,13 +11,23 @@
 <body>
 <div class="container">
     <div class="header">
-        <a href="index.html" class="back-button">
-            <span class="back-arrow">←</span>
-            <span>Back to Map</span>
-        </a>
-        <h1 class="team-title" id="team-name"></h1>
-        <img id="team-logo" class="team-logo" src="" alt="Team Logo">
+        <div class="header-left">
+            <a href="index.html" class="back-button">
+                <span class="back-arrow">←</span>
+                <span>Back to Map</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <h1 class="team-title" id="team-name"></h1>
+        </div>
+        <div class="header-right">
+            <img id="team-logo" class="team-logo" src="" alt="Team Logo">
+        </div>
     </div>
+
+
+    <!-- New Summary Div -->
+    <div id="team-summary" class="team-summary"></div>
 
     <div class="dashboard">
         <div id="visualization-container">
@@ -33,7 +43,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script src="team.js"></script>

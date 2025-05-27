@@ -38,6 +38,14 @@ function createSpendingWinsChart(teamName, teamAbbr) {
                     spending: +r["Avg. Total Payroll Allocation"].replace(/[$,]/g, '') / 1e6
                 };
             }).sort((a,b) => a.year - b.year);
+
+            // ✅ ADDITION: Compute and inject the summary
+            const avgSpendingPerWin = d3.mean(chartData, d => d.spending / d.wins);
+            if (!isNaN(avgSpendingPerWin)) {
+                const summary = document.getElementById("team-summary");
+                summary.textContent = `${teamName} Average Dollar Spent Per Win ('21–'24): $${(avgSpendingPerWin * 1e6).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+
             renderChart(chartData);
         })
         .catch(err => {
