@@ -1,92 +1,34 @@
+<!-- team.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Details</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .team-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .team-logo {
-            height: 120px;
-            margin-bottom: 20px;
-        }
-        .team-info {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .back-button {
-            display: block;
-            margin: 30px auto;
-            padding: 10px 20px;
-            background: #0066cc;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            text-decoration: none;
-            text-align: center;
-            width: 200px;
-        }
-        .back-button:hover {
-            background: #004499;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Team Dashboard</title>
+    <link rel="stylesheet" href="team.css"/>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-<div class="team-info">
-    <div class="team-header">
-        <h1 id="team-title">An Inside Look at the <span id="team-name"></span></h1>
+<div class="container">
+    <div class="header">
+        <a href="index.html" class="back-button">
+            <span class="back-arrow">←</span>
+            <span>Back to Map</span>
+        </a>
+        <h1 class="team-title" id="team-name"></h1>
         <img id="team-logo" class="team-logo" src="" alt="Team Logo">
     </div>
 
-    <div class="info-grid">
-        <div>
-            <p><strong>Abbreviation:</strong> <span id="team-abbr"></span></p>
-            <p><strong>League:</strong> <span id="team-league"></span></p>
-            <p><strong>Division:</strong> <span id="team-division"></span></p>
-            <p><strong>Payroll Tier:</strong> <span id="team-tier"></span></p>
-        </div>
-        <div>
-            <p><strong>Average Wins:</strong> <span id="team-wins"></span></p>
-            <p><strong>Average Payroll:</strong> <span id="team-payroll"></span></p>
+    <div class="dashboard">
+        <div id="visualization-container">
+            <div class="chart-container">
+                <h2 class="chart-title">Recent Spending vs. Wins</h2>
+                <div id="spending-wins-chart"></div>
+            </div>
         </div>
     </div>
-
-    <a href="index.html" class="back-button">Back to Map</a>
 </div>
 
-<script>
-    // Get team data from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-
-    // Update the page with team data
-    document.getElementById('team-name').textContent = urlParams.get('name');
-    document.getElementById('team-abbr').textContent = urlParams.get('abbr');
-    document.getElementById('team-league').textContent = urlParams.get('league');
-    document.getElementById('team-division').textContent = urlParams.get('division');
-    document.getElementById('team-tier').textContent = `${urlParams.get('tier')} of 6`;
-    document.getElementById('team-wins').textContent = urlParams.get('wins');
-    document.getElementById('team-payroll').textContent = urlParams.get('payroll');
-    document.getElementById('team-logo').src = urlParams.get('logo');
-</script>
+<script src="team.js"></script>
 </body>
 </html>
