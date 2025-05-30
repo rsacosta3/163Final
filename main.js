@@ -282,6 +282,22 @@ d3.csv("winspay.csv").then(data => {
                 .on("mouseover", function(event, d) {
                     if (d3.select(this).classed("hidden")) return;
 
+                    /* Increase logo size on hover */
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("width", 60)
+                        .attr("height", 60)
+                        .attr("x", function(d) {
+                            const coords = projection([d.lng, d.lat]);
+                            return coords ? coords[0] - 30 : 0;
+                        })
+                        .attr("y", function(d) {
+                            const coords = projection([d.lng, d.lat]);
+                            return coords ? coords[1] - 30 : 0;
+                        });
+
+                    /* Show tooltip on hover */
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", .9);
@@ -297,6 +313,21 @@ d3.csv("winspay.csv").then(data => {
                         .style("top", (event.pageY - 28) + "px");
                 })
                 .on("mouseout", function() {
+                    /* Scale to original size */
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("width", 40)
+                        .attr("height", 40)
+                        .attr("x", function(d) {
+                            const coords = projection([d.lng, d.lat]);
+                            return coords ? coords[0] - 20 : 0;
+                        })
+                        .attr("y", function(d) {
+                            const coords = projection([d.lng, d.lat]);
+                            return coords ? coords[1] - 20 : 0;
+                        });
+
                     tooltip.transition()
                         .duration(500)
                         .style("opacity", 0);
