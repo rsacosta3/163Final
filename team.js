@@ -30,12 +30,15 @@ function createSpendingWinsChart(teamName, teamAbbr) {
                 return showError("No data available for this team.");
             }
             const byYear = d3.group(teamData, d => d.Year);
+            const playoffValues = ["wildcard", "division winner"];
             const chartData = Array.from(byYear, ([yr, recs]) => {
                 const r = recs[0];
+                const postseason = playoffValues.includes((r["Postseason"] || "").trim().toLowerCase());
                 return {
                     year: +yr,
                     wins: +r.Wins,
-                    spending: +r["Avg. Total Payroll Allocation"].replace(/[$,]/g, '') / 1e6
+                    spending: +r["Avg. Total Payroll Allocation"].replace(/[$,]/g, '') / 1e6,
+                    postseason
                 };
             }).sort((a,b) => a.year - b.year);
 
@@ -104,16 +107,33 @@ function createSpendingWinsChart(teamName, teamAbbr) {
 
         svg.selectAll(".dot-w")
             .data(data).enter().append("circle")
-            .attr("cx", d=>x(d.year)+x.bandwidth()/2)
-            .attr("cy", d=>yW(d.wins)).attr("r",5).attr("fill","steelblue")
-            .on("mouseover", (e,d)=> {
-                tooltip.style("display","block")
-                    .html(`<strong>${d.year}</strong><br/>Wins: ${d.wins}<br/>Spending: $${d.spending.toFixed(1)}M`);
+            .attr("class", "dot-w")
+            .attr("cx", d => x(d.year) + x.bandwidth() / 2)
+            .attr("cy", d => yW(d.wins))
+            .attr("r", 5)
+            .attr("fill", "steelblue")
+            .on("mouseover", (e, d) => {
+                tooltip.style("display", "block")
+                    .html(`<strong>${d.year}</strong><br/>Wins: ${d.wins}<br/>Spending: $${d.spending.toFixed(1)}M<br/>Postseason: ${d.postseason ? "Yes" : "No"}`);
             })
-            .on("mousemove", e=>{
-                tooltip.style("top", (e.pageY-10)+"px").style("left", (e.pageX+10)+"px");
+            .on("mousemove", e => {
+                tooltip.style("top", (e.pageY - 10) + "px").style("left", (e.pageX + 10) + "px");
             })
-            .on("mouseout", ()=> tooltip.style("display","none"));
+            .on("mouseout", () => tooltip.style("display", "none"));
+
+        // Yellow dots for postseason appearances 
+        svg.selectAll(".postseason-dot")
+            .data(data.filter(d => d.postseason))
+            .enter().append("circle")
+            .attr("class", "postseason-dot")
+            .attr("cx", d => x(d.year) + x.bandwidth() / 2)
+            .attr("cy", d => yW(d.wins))
+            .attr("r", 6)
+            .attr("fill", "gold")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1.5);
+        
+        svg.selectAll(".postseason-dot").raise();
 
         svg.selectAll(".dot-s")
             .data(data).enter().append("circle")
@@ -146,6 +166,9 @@ function createSpendingWinsChart(teamName, teamAbbr) {
             .html('<div class="legend-color" style="background:steelblue;"></div><span>Wins</span>');
         legend.append("div").attr("class", "legend-item")
             .html('<div class="legend-color" style="background:green;"></div><span>Spending ($M)</span>');
+        legend.append("div").attr("class", "legend-item")
+            .html('<div class="legend-color" style="background:gold;border:1px solid black;"></div><span>Postseason Appearance</span>');
+
     }
 }
 
