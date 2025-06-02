@@ -43,11 +43,23 @@ function createSpendingWinsChart(teamName, teamAbbr) {
                 };
             }).sort((a,b) => a.year - b.year);
 
-            // ✅ ADDITION: Compute and inject the summary
             const avgSpendingPerWin = d3.mean(chartData, d => d.spending / d.wins);
+            const avgWins = d3.mean(chartData, d => d.wins);
+            const avgSpending = d3.mean(chartData, d => d.spending);
+
             if (!isNaN(avgSpendingPerWin)) {
                 const summary = document.getElementById("team-summary");
-                summary.textContent = `${teamName} Average Dollar Spent Per Win ('21–'24): $${(avgSpendingPerWin * 1e6).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                summary.innerHTML = `
+        <div style="text-align: center; margin-bottom: 8px;">
+            <div style="margin-bottom: 4px;">
+                </strong> Average Wins ${avgWins.toFixed(1)} | Average Payroll $${(avgSpending * 1e6).toLocaleString()}
+            </div>
+            <div>
+                <strong>Average Dollar Spent Per Win:</strong> $${(avgSpendingPerWin * 1e6).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+        </div>
+    `;
+                summary.style.textAlign = "center";  // Additional centering for the container
             }
 
             renderChart(chartData);
@@ -187,11 +199,15 @@ function createPayrollPieChart(teamAbbr) {
         .then(res => res.text())
         .then(text => d3.csvParse(text))
         .then(data => {
+            if (!data || data.length === 0) throw new Error("No data in file");
+
             const filtered = data.filter(d => d.Team === teamAbbr);
             if (!filtered.length) {
-                d3.select("#pie-chart").html("<p style='color:red;text-align:center'>No data available</p>");
-                return;
+                throw new Error(`No data available for ${teamAbbr}`);
             }
+
+            // Get the team's average total payroll (first record has it)
+            const avgTotalPayroll = +filtered[0]["Avg. Total Payroll Allocation"].replace(/[$,]/g, '');
 
             const categorySums = d3.rollup(
                 filtered,
@@ -199,22 +215,35 @@ function createPayrollPieChart(teamAbbr) {
                 d => d["Payroll Type"]
             );
 
-            const pieData = Array.from(categorySums, ([type, value]) => ({ type, value }));
+            const pieData = Array.from(categorySums, ([type, value]) => ({
+                type,
+                value,
+                percentage: (value / avgTotalPayroll) * 100
+            }));
 
             const allowed = ["Active", "Buried", "Injured", "Retained"];
             const cleanData = pieData.filter(d => allowed.includes(getSimpleType(d.type)));
 
-            renderPie(cleanData);
+            // Find categories with >20% (excluding Active 26-Man Roster)
+            const significantCategories = cleanData.filter(d =>
+                !d.type.includes("Active 26-Man Roster") &&
+                d.percentage > 20
+            );
+
+            renderPie(cleanData, significantCategories);
         });
 
-    function renderPie(data) {
+    function renderPie(data, significantCategories) {
         d3.select("#pie-chart").html("");
 
         const width = 400, height = 300, radius = Math.min(width, height) / 2;
+        // Calculate needed height for annotations (20px per line plus padding)
+        const annotationHeight = significantCategories.length > 0 ?
+            30 + (significantCategories.length * 20) : 0;
 
         const svg = d3.select("#pie-chart")
             .append("svg")
-            .attr("viewBox", `0 0 ${width} ${height + 40}`)
+            .attr("viewBox", `0 0 ${width} ${height + annotationHeight}`)
             .attr("preserveAspectRatio", "xMidYMid meet")
             .append("g")
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
@@ -225,6 +254,14 @@ function createPayrollPieChart(teamAbbr) {
         const color = d3.scaleOrdinal()
             .domain(["Active", "Buried", "Injured", "Retained"])
             .range(["#1f77b4", "#ff7f0e", "#d62728", "#2ca02c"]);
+
+        // Add definitions for each payroll type
+        const typeDefinitions = {
+            "Active": "Healthy players on the team",
+            "Injured": "Injured players on the team",
+            "Buried": "MLB players in the Minor Leagues",
+            "Retained": "Money spent on a non-roster player (trade/release)"
+        };
 
         const tooltip = d3.select("body")
             .append("div")
@@ -239,8 +276,14 @@ function createPayrollPieChart(teamAbbr) {
             .attr("d", arc)
             .attr("fill", d => color(getSimpleType(d.data.type)))
             .on("mouseover", (event, d) => {
+                const type = getSimpleType(d.data.type);
                 tooltip.style("display", "block")
-                    .html(`<strong>${getSimpleType(d.data.type)}</strong><br/>$${d.data.value.toLocaleString()}`);
+                    .html(`
+                    <strong>${type}</strong><br/>
+                    $${d.data.value.toLocaleString()}<br/>
+                    ${d.data.percentage.toFixed(1)}% of payroll<br/>
+                    <em>${typeDefinitions[type] || ''}</em>
+                `);
             })
             .on("mousemove", event => {
                 tooltip
@@ -248,6 +291,32 @@ function createPayrollPieChart(teamAbbr) {
                     .style("top", (event.pageY - 28) + "px");
             })
             .on("mouseout", () => tooltip.style("display", "none"));
+
+        // Add annotation for significant categories
+        if (significantCategories.length > 0) {
+            const annotationContainer = d3.select("#pie-chart svg")
+                .append("g")
+                .attr("transform", `translate(0, ${height})`);
+
+            annotationContainer.append("text")
+                .attr("x", width / 2)
+                .attr("y", 20)
+                .attr("text-anchor", "middle")
+                .style("font-size", "14px")
+                .style("font-weight", "bold")
+                .style("fill", "#d62728")
+                .text("Significant Spending Alert:");
+
+            // Add bullet points for each significant category
+            significantCategories.forEach((category, i) => {
+                annotationContainer.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", 40 + (i * 20)) // 20px spacing between lines
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "12px")
+                    .html(`• More than 20% spent on <tspan style="font-weight:bold">${getSimpleType(category.type)}</tspan> (${category.percentage.toFixed(1)}%)`);
+            });
+        }
 
         const titleContainer = d3.select("#pie-chart-container .chart-title");
         const legend = titleContainer.append("div").attr("class", "chart-legend-inline");
@@ -273,17 +342,17 @@ function createSpendingWinsComparisonChart(teamName, teamAbbr) {
 
     // Divisions
     const divisions = {
-        'AL East': ['NYY', 'BOS', 'TB', 'TOR', 'BAL'],
-        'AL Central': ['CHW', 'CLE', 'DET', 'KC', 'MIN'],
+        'AL East': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL'],
+        'AL Central': ['CHW', 'CLE', 'DET', 'KCR', 'MIN'],
         'AL West': ['HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
-        'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH'],
+        'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSN'],
         'NL Central': ['CHC', 'CIN', 'MIL', 'PIT', 'STL'],
-        'NL West': ['ARI', 'COL', 'LAD', 'SD', 'SF']
+        'NL West': ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
     };
     // Leagues
     const leagues = {
-        'AL': ['NYY', 'BOS', 'TB', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KC', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
-        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SD', 'SF']
+        'AL': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
+        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
     };
 
     // Find teams division and leaue
