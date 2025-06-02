@@ -8,6 +8,7 @@ document.getElementById('team-logo').src = teamLogo;
 
 createSpendingWinsChart(teamName, teamAbbr);
 createPayrollPieChart(teamAbbr);
+createSpendingWinsComparisonChart(teamName, teamAbbr);
 
 function createSpendingWinsChart(teamName, teamAbbr) {
     const csvPath = "Spend vs Wins_data.csv";
@@ -264,5 +265,179 @@ function createPayrollPieChart(teamAbbr) {
         if (type.includes("Injured")) return "Injured";
         if (type.includes("Retained")) return "Retained";
         return "Other";
+    }
+}
+
+function createSpendingWinsComparisonChart(teamName, teamAbbr) {
+     const csvPath = "Spend vs Wins_data.csv";
+
+    // Divisions
+    const divisions = {
+        'AL East': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL'],
+        'AL Central': ['CHW', 'CLE', 'DET', 'KCR', 'MIN'],
+        'AL West': ['HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
+        'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSN'],
+        'NL Central': ['CHC', 'CIN', 'MIL', 'PIT', 'STL'],
+        'NL West': ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
+    };
+    // Leagues
+    const leagues = {
+        'AL': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
+        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
+    };
+
+    // Find teams division and leaue
+    let teamDivision = null, teamLeague = null;
+    for (const [div, teams] of Object.entries(divisions)) {
+        if (teams.includes(teamAbbr)) {
+            teamDivision = div;
+            teamLeague = div.startsWith('AL') ? 'AL' : 'NL';
+            break;
+        }
+    }
+
+    fetch(csvPath)
+        .then(res => res.arrayBuffer())
+        .then(buf => new TextDecoder('utf-16le').decode(buf))
+        .then(text => d3.tsvParse(text))
+        .then(data => {
+            const norm = s => s?.trim().toLowerCase();
+            const valid = data.filter(d =>
+                d.Team && d["Team Name"] && d.Year &&
+                d.Wins && d["Avg. Total Payroll Allocation"] && +d.Wins > 0
+            );
+
+            // Get spending average
+            const teamAvgSpendingPerWin = d3.rollup(
+                valid,
+                v => {
+                    const totalSpending = d3.sum(v, d => +d["Avg. Total Payroll Allocation"].replace(/[$,]/g, '') / 1e6);
+                    const totalWins = d3.sum(v, d => +d.Wins);
+                    return totalSpending / totalWins;
+                },
+                d => d.Team
+            );
+
+            const chartData = Array.from(teamAvgSpendingPerWin, ([abbr, spendingPerWin]) => ({
+                abbr,
+                name: valid.find(d => d.Team === abbr)["Team Name"],
+                spendingPerWin
+            }));
+
+            // Create dropdown list for division, league, mlb
+            const select = d3.select("#comparison-chart-container")
+                .insert("select", ":first-child")
+                .attr("id", "comparison-toggle")
+                .style("margin-bottom", "10px");
+            select.selectAll("option")
+                .data(["Division", "League", "MLB"])
+                .enter()
+                .append("option")
+                .attr("value", d => d)
+                .text(d => d);
+
+            
+            renderComparisonChart(chartData, teamAbbr, teamDivision, teamLeague, "Division");
+
+            // update when we toggle
+            select.on("change", function() {
+                const scope = d3.select(this).property("value");
+                renderComparisonChart(chartData, teamAbbr, teamDivision, teamLeague, scope);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            showError("Error loading data for comparison chart.", "#comparison-chart");
+        });
+
+    function renderComparisonChart(data, teamAbbr, teamDivision, teamLeague, scope) {
+        d3.select("#comparison-chart").html("");
+
+        // Filter data based on selection
+        let filteredData;
+        if (scope === "Division") {
+            filteredData = data.filter(d => divisions[teamDivision].includes(d.abbr));
+        } else if (scope === "League") {
+            filteredData = data.filter(d => leagues[teamLeague].includes(d.abbr));
+        } else {
+            filteredData = data;
+        }
+
+        // Sort by spending per win (descending)
+        filteredData.sort((a, b) => b.spendingPerWin - a.spendingPerWin);
+
+        const container = document.getElementById("comparison-chart");
+        const m = { top: 30, right: 30, bottom: 100, left: 60 };
+        const w = container.clientWidth - m.left - m.right;
+        const h = container.clientHeight - m.top - m.bottom;
+
+        const svg = d3.select("#comparison-chart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${w + m.left + m.right} ${h + m.top + m.bottom}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("width", "100%")
+            .style("height", "100%")
+            .append("g")
+            .attr("transform", `translate(${m.left},${m.top})`);
+
+        const x = d3.scaleBand()
+            .domain(filteredData.map(d => d.abbr))
+            .range([0, w])
+            .padding(0.05);
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(filteredData, d => d.spendingPerWin) * 1.1])
+            .range([h, 0]);
+
+        const tooltip = d3.select("body").append("div").attr("class", "tooltip");
+
+        svg.selectAll(".bar")
+            .data(filteredData)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.abbr))
+            .attr("y", d => y(d.spendingPerWin))
+            .attr("width", x.bandwidth())
+            .attr("height", d => h - y(d.spendingPerWin))
+            .attr("fill", d => d.abbr === teamAbbr ? "gold" : "steelblue")
+            .on("mouseover", (e, d) => {
+                tooltip.style("display", "block")
+                    .html(`<strong>${d.name}</strong><br/>$${d.spendingPerWin.toFixed(2)}M per Win`);
+            })
+            .on("mousemove", e => {
+                tooltip.style("top", (e.pageY - 10) + "px").style("left", (e.pageX + 10) + "px");
+            })
+        .on("mouseout", () => tooltip.style("display", "none"));
+
+        svg.append("g")
+            .attr("transform", `translate(0,${h})`)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-45)"); // Rotate labels for readability
+        svg.append("g")
+            .call(d3.axisLeft(y).tickFormat(d => `$${d.toFixed(1)}M`));
+
+        svg.append("text")
+            .attr("x", w / 2)
+            .attr("y", h + 80)
+            .attr("text-anchor", "middle")
+            .text("Team");
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -h / 2)
+            .attr("y", -49)
+            .attr("text-anchor", "middle")
+            .text("Spending per Win ($M)");
+
+        const titleContainer = d3.select("#comparison-chart-container .chart-title");
+        titleContainer.html(`Spending per Win Comparison (${scope})`);
+    }
+
+    function showError(msg, selector) {
+        d3.select(selector)
+            .html(`<p style="color:red;text-align:center;margin-top:50px">${msg}</p>`);
     }
 }

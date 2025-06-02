@@ -202,4 +202,46 @@
 /* Responsive layout */
 @media (max-width: 768px) {
     .header {
-        flex-direction: colum
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+        flex: none;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .team-logo {
+        height: 70px;
+    }
+
+    .team-title {
+        font-size: 1.5rem;
+    }
+
+    .dashboard {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #visualization-container,
+    #pie-chart-container,
+    #comparison-chart-container {
+        margin: 0 auto 20px;
+    }
+
+
+    #comparison-toggle {
+        width: 150px;
+        font-size: 12px;
+    }
+
+    #comparison-chart {
+        height: 500px;
+    }
+}
