@@ -273,17 +273,17 @@ function createSpendingWinsComparisonChart(teamName, teamAbbr) {
 
     // Divisions
     const divisions = {
-        'AL East': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL'],
-        'AL Central': ['CHW', 'CLE', 'DET', 'KCR', 'MIN'],
+        'AL East': ['NYY', 'BOS', 'TB', 'TOR', 'BAL'],
+        'AL Central': ['CHW', 'CLE', 'DET', 'KC', 'MIN'],
         'AL West': ['HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
         'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH'],
         'NL Central': ['CHC', 'CIN', 'MIL', 'PIT', 'STL'],
-        'NL West': ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        'NL West': ['ARI', 'COL', 'LAD', 'SD', 'SF']
     };
     // Leagues
     const leagues = {
-        'AL': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
-        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        'AL': ['NYY', 'BOS', 'TB', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KC', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
+        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SD', 'SF']
     };
 
     // Find teams division and leaue
