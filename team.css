@@ -83,7 +83,8 @@
 
 /* Chart containers */
 #visualization-container,
-#pie-chart-container {
+#pie-chart-container,
+#comparison-chart-container {
     width: 100%;
     max-width: 550px;
     background-color: white;
@@ -96,6 +97,9 @@
 .chart-container {
     width: 100%;
     height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .chart-title {
@@ -143,6 +147,18 @@
     display: none;
 }
 
+/* Dropdown toggle for comparison chart */
+#comparison-toggle {
+    width: 200px;
+    padding: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #444;
+}
+
 /* Chart specific styles */
 #spending-wins-chart {
     width: 100%;
@@ -171,38 +187,19 @@
     display: block;
 }
 
+#comparison-chart {
+    width: 100%;
+    height: 600px;
+    position: relative;
+}
+
+#comparison-chart svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 /* Responsive layout */
 @media (max-width: 768px) {
     .header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .header-left,
-    .header-center,
-    .header-right {
-        flex: none;
-        width: 100%;
-        justify-content: center;
-        margin-bottom: 10px;
-    }
-
-    .team-logo {
-        height: 70px;
-    }
-
-    .team-title {
-        font-size: 1.5rem;
-    }
-
-    .dashboard {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    #visualization-container,
-    #pie-chart-container {
-        margin: 0 auto 20px;
-    }
-}
+        flex-direction: colum
