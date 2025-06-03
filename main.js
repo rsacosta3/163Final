@@ -400,3 +400,150 @@ document.getElementById("help-icon").addEventListener("click", () => {
     const helpBox = document.getElementById("help-box");
     helpBox.style.display = helpBox.style.display === "none" ? "block" : "none";
 });
+
+
+// Enhanced intro animation script
+document.addEventListener("DOMContentLoaded", () => {
+    const introScreen = document.getElementById("intro-screen");
+
+    // If intro has already been shown this session, skip it
+    if (sessionStorage.getItem("introShown")) {
+        introScreen.remove();
+        setTimeout(() => {
+            if (typeof animateTeamLogos === 'function') {
+                animateTeamLogos();
+            }
+        }, 100);
+        return;
+    }
+
+    const slides = document.querySelectorAll('.intro-slide');
+    const progressFill = document.getElementById('progress-fill');
+    const exploreBtn = document.getElementById('explore-btn');
+    const moneyRain = document.getElementById('money-rain');
+    
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+    const slideDuration = 5000; // 5 seconds per slide
+    let slideTimeout;
+    
+    // Create money rain effect
+    function createMoneyRain() {
+        const symbols = ['$', '💰', '💸', '💵'];
+        for (let i = 0; i < 15; i++) {
+            setTimeout(() => {
+                const dollar = document.createElement('div');
+                dollar.className = 'dollar-bill';
+                dollar.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                dollar.style.left = Math.random() * 100 + '%';
+                dollar.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                dollar.style.animationDelay = Math.random() * 2 + 's';
+                moneyRain.appendChild(dollar);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (dollar.parentNode) {
+                        dollar.parentNode.removeChild(dollar);
+                    }
+                }, 8000);
+            }, i * 200);
+        }
+    }
+    
+    // Function to show a slide
+    function showSlide(index) {
+        // Clear any existing timeout
+        if (slideTimeout) clearTimeout(slideTimeout);
+        
+        // Hide all slides
+        slides.forEach(slide => slide.classList.remove('show'));
+        
+        // Show current slide
+        if (slides[index]) {
+            slides[index].classList.add('show');
+            
+            // Special animations for specific slides
+            if (index === 0) {
+                // Start money rain on first slide
+                createMoneyRain();
+                setInterval(createMoneyRain, 8000);
+            }
+            
+            if (index === 2) {
+                // Animate salary bars
+                setTimeout(() => {
+                    document.getElementById('salary-low').classList.add('animate');
+                }, 1000);
+                setTimeout(() => {
+                    document.getElementById('salary-high').classList.add('animate');
+                }, 2000);
+            }
+            
+            if (index === 3) {
+                // Animate team cards
+                setTimeout(() => {
+                    document.getElementById('athletics-card').classList.add('show');
+                }, 800);
+                setTimeout(() => {
+                    document.getElementById('dodgers-card').classList.add('show');
+                }, 1500);
+            }
+            
+            if (index === 6) {
+                // Show explore button
+                setTimeout(() => {
+                    exploreBtn.classList.add('show');
+                }, 2000);
+            }
+        }
+        
+        // Update progress bar
+        const progress = ((index + 1) / totalSlides) * 100;
+        progressFill.style.width = progress + '%';
+        
+        // Set timeout for next slide (except last slide)
+        if (index < totalSlides - 1) {
+            slideTimeout = setTimeout(() => {
+                currentSlide++;
+                showSlide(currentSlide);
+            }, slideDuration);
+        }
+    }
+    
+    // Start the slideshow
+    showSlide(0);
+    
+    // Handle explore button click
+    exploreBtn.addEventListener('click', () => {
+        introScreen.style.transition = 'opacity 1.5s ease';
+        introScreen.style.opacity = '0';
+        
+        setTimeout(() => {
+            introScreen.remove();
+            sessionStorage.setItem('introShown', 'true');
+            setTimeout(() => {
+                if (typeof animateTeamLogos === 'function') {
+                    animateTeamLogos();
+                }
+            }, 100);
+        }, 1500);
+    });
+    
+    // Skip intro on keypress
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === ' ') {
+            if (slideTimeout) clearTimeout(slideTimeout);
+            currentSlide = totalSlides - 1;
+            showSlide(currentSlide);
+        }
+    });
+    
+    // Allow clicking to advance slides
+    document.addEventListener('click', (e) => {
+        if (e.target !== exploreBtn && currentSlide < totalSlides - 1) {
+            if (slideTimeout) clearTimeout(slideTimeout);
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+    });
+});
