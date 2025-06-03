@@ -168,8 +168,7 @@ function applyFilters() {
             const shouldShow = leagueMatch && divisionMatch && payTierMatch;
 
             d3.select(this)
-                .classed("hidden", !shouldShow)
-                .style("pointer-events", shouldShow ? "all" : "none");
+            .style("display", shouldShow ? "block" : "none");
         });
 }
 
@@ -395,4 +394,9 @@ window.addEventListener("resize", function() {
             const coords = projection([d.lng, d.lat]);
             return coords ? coords[1] - 20 : 0;
         });
+});
+
+document.getElementById("help-icon").addEventListener("click", () => {
+    const helpBox = document.getElementById("help-box");
+    helpBox.style.display = helpBox.style.display === "none" ? "block" : "none";
 });

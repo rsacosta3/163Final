@@ -86,6 +86,7 @@ h1 {
 }
 
 .dropdown-content {
+    top: 100%;
     display: none;
     position: absolute;
     left: 0;
@@ -95,7 +96,7 @@ h1 {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
     padding: 10px;
-    margin-top: 5px;
+    margin-top: 0;
 }
 
 .dropdown:hover .dropdown-content {
@@ -254,4 +255,34 @@ h1 {
 
 .explore-btn:hover {
     background: #D50032; /* MLB red on hover */
+}
+
+#help-icon{
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    width: 30px;
+    height: 30px;
+    background-color: #333;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    cursor: pointer;
+    z-index: 999;
+}
+
+#help-box{
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 998;
+    font-size: 14px;
+    max-width: 260px;
 }
