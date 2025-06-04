@@ -720,6 +720,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const dropdown = document.querySelector('.dropdown');
+    const button = dropdown.querySelector('.dropdown-btn');
+    const content = dropdown.querySelector('.dropdown-content');
+
+    let isHovered = false;
+
+    // Toggle on click
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
+
+    // Stay open when hovered
+    dropdown.addEventListener('mouseenter', () => {
+        isHovered = true;
+        dropdown.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', () => {
+        isHovered = false;
+        // Delay hiding to allow mouse to move between elements
+        setTimeout(() => {
+            if (!isHovered) dropdown.classList.remove('show');
+        }, 200);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', () => {
+        if (!isHovered) dropdown.classList.remove('show');
+    });
+
+    // Prevent closing when clicking inside content
+    content.addEventListener('click', e => e.stopPropagation());
+});
+
+
 </script>
 
 <script src="main.js"></script>

@@ -27,7 +27,7 @@ const tooltip = d3.select("body").append("div")
 
 // Set up projection to fit the US in the fixed container
 const projection = d3.geoAlbersUsa()
-    .translate([width / 2, height / 2])
+    .translate([width / 2, height / 2.3])
     .scale(width * 0.9);
 
 // Create path generator
