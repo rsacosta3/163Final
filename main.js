@@ -156,7 +156,7 @@ function applyFilters() {
 
 }
 
-
+//set up buttons
 function setupSelectAllButtons() {
     document.querySelectorAll('.select-all').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -175,6 +175,7 @@ function setupSelectAllButtons() {
     });
 }
 
+//payroll tiers
 function addMapLegend() {
     const legendHtml = `
         <div class="map-legend">

@@ -223,7 +223,7 @@ function createSpendingWinsChart(teamName, teamAbbr) {
 
     }
 }
-
+//payroll allocation
 function createPayrollPieChart(teamAbbr) {
     const csvPath = "winspay.csv";
 
@@ -314,11 +314,11 @@ function createPayrollPieChart(teamAbbr) {
                 .attr("id", `gradient-${i}`)
                 .attr("cx", "30%")
                 .attr("cy", "30%");
-            
+
             gradient.append("stop")
                 .attr("offset", "0%")
                 .attr("stop-color", d3.color(color(d.simpleType)).brighter(0.5));
-            
+
             gradient.append("stop")
                 .attr("offset", "100%")
                 .attr("stop-color", color(d.simpleType));
@@ -396,11 +396,11 @@ function createPayrollPieChart(teamAbbr) {
 
         // Enhanced interactions with segment filtering
         let selectedSegment = null;
-        
+
         slices
             .on("mouseover", function(event, d) {
                 if (selectedSegment !== null && selectedSegment !== d.data.simpleType) return;
-                
+
                 d3.select(this).select("path")
                     .transition()
                     .duration(200)
@@ -410,7 +410,7 @@ function createPayrollPieChart(teamAbbr) {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", 1);
-                
+
                 const type = d.data.simpleType;
                 tooltip.html(`
                     <div style="text-align: center; margin-bottom: 8px;">
@@ -432,7 +432,7 @@ function createPayrollPieChart(teamAbbr) {
             })
             .on("mouseout", function() {
                 if (selectedSegment !== null) return;
-                
+
                 d3.select(this).select("path")
                     .transition()
                     .duration(200)
@@ -463,19 +463,19 @@ function createPayrollPieChart(teamAbbr) {
                 } else {
                     // Select this segment
                     selectedSegment = clickedType;
-                    
+
                     slices.selectAll("path")
                         .transition()
                         .duration(500)
                         .attr("transform", (data) => data.data.simpleType === clickedType ? "scale(1.1)" : "scale(0.9)")
                         .style("opacity", (data) => data.data.simpleType === clickedType ? 1 : 0.3)
-                        .style("filter", (data) => data.data.simpleType === clickedType ? 
-                            "drop-shadow(0 6px 12px rgba(0,0,0,0.4))" : 
+                        .style("filter", (data) => data.data.simpleType === clickedType ?
+                            "drop-shadow(0 6px 12px rgba(0,0,0,0.4))" :
                             "drop-shadow(0 1px 2px rgba(0,0,0,0.2))");
-                    
+
                     // Update center text to show focused category
                     centerGroup.selectAll(".center-text text").style("opacity", 0.3);
-                    
+
                     centerGroup.append("g")
                         .attr("class", "center-focus-text")
                         .append("text")
@@ -486,7 +486,7 @@ function createPayrollPieChart(teamAbbr) {
                         .style("fill", color(clickedType))
                         .text(`${clickedType}: ${d.data.percentage.toFixed(1)}%`);
                 }
-                
+
                 // Add click animation
                 d3.select(this).select("path")
                     .transition()
@@ -545,7 +545,7 @@ function createPayrollPieChart(teamAbbr) {
                     .transition()
                     .duration(200)
                     .attr("transform", "scale(1.2)");
-                    
+
                 // Highlight corresponding pie slice
                 const correspondingSlice = slices.filter(slice => slice.data.simpleType === d.simpleType);
                 correspondingSlice.select("path")
@@ -555,12 +555,12 @@ function createPayrollPieChart(teamAbbr) {
             })
             .on("mouseout", function(event, d) {
                 if (selectedSegment === d.simpleType) return;
-                
+
                 d3.select(this).select("rect")
                     .transition()
                     .duration(200)
                     .attr("transform", "scale(1)");
-                    
+
                 // Reset corresponding pie slice
                 const correspondingSlice = slices.filter(slice => slice.data.simpleType === d.simpleType);
                 correspondingSlice.select("path")
@@ -568,27 +568,7 @@ function createPayrollPieChart(teamAbbr) {
                     .duration(200)
                     .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.2))");
             });
-/*
-        // Add center text
-        const centerGroup = g.append("g")
-            .attr("class", "center-text");
 
-        centerGroup.append("text")
-            .attr("text-anchor", "middle")
-            .attr("dy", "-0.5em")
-            .style("font-size", "16px")
-            .style("font-weight", "bold")
-            .style("fill", "#333")
-            .text("Total Payroll");
-
-        centerGroup.append("text")
-            .attr("text-anchor", "middle")
-            .attr("dy", "1em")
-            .style("font-size", "20px")
-            .style("font-weight", "bold")
-            .style("fill", colors.gold)
-            .text(`$${d3.sum(data, d => d.value).toLocaleString()}`);
-*/
         // Add significant spending alert
         if (significantCategories.length > 0) {
             const alertGroup = svg.append("g")
@@ -632,6 +612,7 @@ function createPayrollPieChart(teamAbbr) {
     }
 }
 
+//spending vs wins
 function createSpendingWinsComparisonChart(teamName, teamAbbr) {
     const csvPath = "Spend vs Wins_data.csv";
 
