@@ -634,17 +634,17 @@ function createSpendingWinsComparisonChart(teamName, teamAbbr) {
     const csvPath = "Spend vs Wins_data.csv";
 
     const divisions = {
-        'AL East': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL'],
-        'AL Central': ['CHW', 'CLE', 'DET', 'KCR', 'MIN'],
+        'AL East': ['NYY', 'BOS', 'TB', 'TOR', 'BAL'],
+        'AL Central': ['CHW', 'CLE', 'DET', 'KC', 'MIN'],
         'AL West': ['HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
-        'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSN'],
+        'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH'],
         'NL Central': ['CHC', 'CIN', 'MIL', 'PIT', 'STL'],
-        'NL West': ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        'NL West': ['ARI', 'COL', 'LAD', 'SD', 'SF']
     };
 
     const leagues = {
-        'AL': ['NYY', 'BOS', 'TBR', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
-        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        'AL': ['NYY', 'BOS', 'TB', 'TOR', 'BAL', 'CHW', 'CLE', 'DET', 'KC', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX'],
+        'NL': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SD', 'SF']
     };
 
     let teamDivision = null, teamLeague = null;
