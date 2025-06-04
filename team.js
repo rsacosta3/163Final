@@ -84,10 +84,10 @@ function createSpendingWinsChart(teamName, teamAbbr) {
                 summary.innerHTML = `
         <div style="text-align: center; margin-bottom: 8px;">
             <div style="margin-bottom: 4px;">
-                </strong> Average Wins ${avgWins.toFixed(1)} | Average Payroll ${(avgSpending * 1e6).toLocaleString()}
+                </strong> Average Wins ${avgWins.toFixed(1)} | Average Payroll $${(avgSpending * 1e6).toLocaleString()}
             </div>
             <div>
-                <strong>Average Dollar Spent Per Win:</strong> ${(avgSpendingPerWin * 1e6).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <strong>Average Dollar Spent Per Win:</strong> $${(avgSpendingPerWin * 1e6).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
         </div>
     `;
@@ -267,9 +267,11 @@ function createPayrollPieChart(teamAbbr) {
     function renderInteractivePie(data, significantCategories) {
         d3.select("#pie-chart").html("");
 
-        const width = 450, height = 350, radius = Math.min(width, height) / 2 - 40;
+        // Increase container size
+        const width = 500, height = 400, radius = Math.min(width, height) / 2 - 50;
+        // Increase annotation height to fit all alerts
         const annotationHeight = significantCategories.length > 0 ?
-            30 + (significantCategories.length * 20) : 0;
+            40 + (significantCategories.length * 20) : 0;
 
         const svg = d3.select("#pie-chart")
             .append("svg")
@@ -443,9 +445,9 @@ function createPayrollPieChart(teamAbbr) {
             })
             .on("click", function(event, d) {
                 event.stopPropagation();
-                
+
                 const clickedType = d.data.simpleType;
-                
+
                 if (selectedSegment === clickedType) {
                     // Deselect - show all segments
                     selectedSegment = null;
@@ -455,7 +457,7 @@ function createPayrollPieChart(teamAbbr) {
                         .attr("transform", "scale(1)")
                         .style("opacity", 1)
                         .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.2))");
-                    
+
                     centerGroup.select(".center-focus-text").remove();
                     centerGroup.selectAll(".center-text text").style("opacity", 1);
                 } else {
@@ -507,7 +509,7 @@ function createPayrollPieChart(teamAbbr) {
 
         // Enhanced legend with clickable items
         const legendContainer = svg.append("g")
-            .attr("transform", `translate(${width - 150}, 20)`);
+            .attr("transform", `translate(${width - 500}, 0)`);
 
         const legendItems = legendContainer.selectAll(".legend-item")
             .data(data)
@@ -566,7 +568,7 @@ function createPayrollPieChart(teamAbbr) {
                     .duration(200)
                     .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.2))");
             });
-
+/*
         // Add center text
         const centerGroup = g.append("g")
             .attr("class", "center-text");
@@ -586,25 +588,25 @@ function createPayrollPieChart(teamAbbr) {
             .style("font-weight", "bold")
             .style("fill", colors.gold)
             .text(`$${d3.sum(data, d => d.value).toLocaleString()}`);
-
+*/
         // Add significant spending alert
         if (significantCategories.length > 0) {
             const alertGroup = svg.append("g")
-                .attr("transform", `translate(0, ${height + 20})`);
+                .attr("transform", `translate(0, ${height})`);
 
             alertGroup.append("rect")
                 .attr("width", width)
-                .attr("height", annotationHeight - 10)
-                .attr("fill", "rgba(220, 38, 38, 0.1)")
-                .attr("stroke", colors.danger)
+                .attr("height", annotationHeight)
+                .attr("fill", "none")
+                .attr("stroke", "none")
                 .attr("stroke-width", 2)
                 .attr("rx", 8);
 
             alertGroup.append("text")
                 .attr("x", width / 2)
-                .attr("y", 20)
+                .attr("y", 15)
                 .attr("text-anchor", "middle")
-                .style("font-size", "14px")
+                .style("font-size", "20px")
                 .style("font-weight", "bold")
                 .style("fill", colors.danger)
                 .text("⚠️ Significant Non-Active Spending Alert");
@@ -614,7 +616,7 @@ function createPayrollPieChart(teamAbbr) {
                     .attr("x", width / 2)
                     .attr("y", 40 + (i * 18))
                     .attr("text-anchor", "middle")
-                    .style("font-size", "12px")
+                    .style("font-size", "20px")
                     .style("fill", "#666")
                     .text(`• ${category.percentage.toFixed(1)}% on ${category.simpleType} players`);
             });
